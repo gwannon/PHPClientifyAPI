@@ -63,14 +63,24 @@ class contactClientify {
     }
   }
 
-  public function update() {
+  public function delete() {
+    if (is_numeric($id) && $id > 0) $response = curlClientfyCallDelete("/contacts/{$this->id}/");
+    $this->id = 0;
+    $this->firstName = "";
+    $this->lastName = "";
+    $this->emails = "";
+    $this->phones = "";
+    $this->tags = "";
+    $this->status = "";
+  }
+
+  public function updateData() {
     $payload = [
       "first_name" => $this->firstName,
       "last_name" => $this->lastName,
       "status" => $this->status,
       //"phone" => $this->phone,
       //"email" => $this->email,
-      //"tags" => $tags,
     ];
     $response = curlClientfyCallPut("/contacts/{$this->id}/", json_encode($payload));
   }
