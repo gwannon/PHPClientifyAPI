@@ -25,11 +25,10 @@ function curlClientfyCall($link, $request = 'GET', $payload = false) {
   $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
   curl_close($curl);
-  if (in_array($httpcode, array(200, 201))) {
+  if (in_array($httpcode, array(200, 201, 204))) {
     if(CLIENTIFY_LOG_API_CALLS) curlClientfyLog("logs", $now, $link, $request, $payload );
     return $json;
   } else {
-    echo 'Curl error: ' . curl_error($curl);
     if(CLIENTIFY_LOG_API_CALLS) curlClientfyLog("errors", $now, $link, $request, $payload, $httpcode, json_encode($json));
     //throw new Exception($httpcode." - ".json_encode($json));
     return false;

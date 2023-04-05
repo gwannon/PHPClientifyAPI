@@ -26,10 +26,9 @@ class contactClientify {
       $response = curlClientfyCall("/contacts/{$id}/");
     } else if (filter_var($id, FILTER_VALIDATE_EMAIL)) {
       $temp = curlClientfyCall("/contacts/?query={$id}&email={$id}");
-      print_r($temp);
       $response = (count($temp->results) > 0 ? $temp->results[0] : false);
-      print_r ($response);
     }
+
     if(isset($response) && is_object($response)) {
       $this->id = $response->id;
       $this->firstName = $response->first_name;
@@ -51,18 +50,6 @@ class contactClientify {
       "email" => $email,
       "status" => "lead-frio",
       "tags" => $tags,
-      //"title" => "Mrs.",
-      //"company" => "Henderson Gomez LLC",
-      //"contact_type" => "",
-      //"contact_source" => "",
-      //"addresses" => [json_decode('{"street":"camino de la coquina, 23", "city":"Lugo", "state":"Galicia", "country":"Spain", "postal_code":"34", "type":1}')],
-      //"custom_fields" => [],
-      //"description" => "Sunt vitae consequun",
-      //"remarks" => "Consequatur aliquid",
-      //"summary" => "Voluptas dolorem com",
-      //"message" => "Nobis aliquip quia c",
-      //"re_property_name" => "Hakeem Hicks",
-      //"last_contact" => null,
     ];
     $response = curlClientfyCallPost("/contacts/", json_encode($payload));
     if(isset($response) && is_object($response)) {
@@ -76,8 +63,54 @@ class contactClientify {
     }
   }
 
+  public function update() {
+    $payload = [
+      "first_name" => $this->firstName,
+      "last_name" => $this->lastName,
+      "status" => $this->status,
+      //"phone" => $this->phone,
+      //"email" => $this->email,
+      //"tags" => $tags,
+    ];
+    $response = curlClientfyCallPut("/contacts/{$this->id}/", json_encode($payload));
+  }
+    
+  public function updateTags() {    
+    $deleteTags = [];
+    $newTags = [];
+    $response = curlClientfyCall("/contacts/{$this->id}/tags/");
+    $currentTags = $response->results;
+    foreach($this->tags as $tag) {
+      $controlNew = 0;
+      foreach($currentTags as $currentTag) {
+        if($tag == $currentTag->name) {
+          $controlNew = 1;
+        }
+      }
+      if($controlNew == 0) $response = curlClientfyCallPost("/contacts/{$this->id}/tags/", json_encode(["name" => $tag]));
+    }
+
+    foreach($currentTags as $currentTag) {
+      $controlDelete = 0;
+      foreach($this->tags as $tag) {
+        if($tag == $currentTag->name) {
+          $controlDelete = 1;
+        }
+      }
+      if($controlDelete == 0) $response = curlClientfyCallDelete("/contacts/{$this->id}/tags/{$currentTag->id}/");
+    }
+  }
+
+
   public static function existsContact($id) {
-    return true;
+    if (is_numeric($id) && $id > 0) {
+      $response = curlClientfyCall("/contacts/{$id}/");
+    } else if (filter_var($id, FILTER_VALIDATE_EMAIL)) {
+      $temp = curlClientfyCall("/contacts/?query={$id}&email={$id}");
+      $response = (count($temp->results) > 0 ? $temp->results[0] : false);
+    }
+    if(isset($response) && is_object($response) && isset($response->id) && is_numeric($response->id) && $response->id > 0) return true;
+    return false;
   }
 
 }
