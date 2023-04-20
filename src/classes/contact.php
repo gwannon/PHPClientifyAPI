@@ -84,7 +84,11 @@ class contactClientify {
     ];
     $response = curlClientfyCallPut("/contacts/{$this->id}/", json_encode($payload));
   }
-    
+
+  public function addTag($tag) { $this->tags[] = $tag; return true; }
+
+  public function deleteTag($tag) { $this->tags = array_diff($this->tags, [$tag]); }
+      
   public function updateTags() {    
     $deleteTags = [];
     $newTags = [];
