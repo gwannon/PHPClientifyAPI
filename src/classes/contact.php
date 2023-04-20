@@ -84,6 +84,17 @@ class contactClientify {
   }
 
   /* EMAILS */
+  public function getEmails() { return $this->emails; }
+  
+  public function hasEmail($email) { 
+    $email = strtolower($email);
+    if (filter_var($email, FILTER_VALIDATE_EMAIL) && 
+      array_search($email, array_column(json_decode(json_encode($this->emails),TRUE), 'email'))) {
+      return true;
+    }
+    return false;
+  }
+
   public function addEmail($email, $type) { 
     $email = strtolower($email);
     if (filter_var($email, FILTER_VALIDATE_EMAIL) && 
@@ -106,8 +117,6 @@ class contactClientify {
     }
     return false;
   }
-
-  public function getEmails() { return $this->emails; }
 
   public function updateEmails() {    
     $deleteEmails = [];
@@ -134,6 +143,11 @@ class contactClientify {
 
   /* TAGS */
   public function getTags() { return $this->tags; }
+
+  public function hasTag($tag) {
+    if(in_array($tag, $this->tags)) return true;
+    else return false;
+  }
 
   public function addTag($tag) { $this->tags[] = $tag; return true; }
 

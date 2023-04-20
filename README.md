@@ -9,8 +9,8 @@ Renombra config.dist.php como config.php y configura tu API Key de Clientify.
 Los tags, emails, teléfonos y direcciones no se actualizan en la API hasta que no se ejecuta las funcione updateTags(), updateEmails(), ... Es una forma de ahorrar llamadas a la API concentrandolas en una sola función.
 
 ## Todo
-* add/delete/update direcciones
-* add/delete/update teléfonos
+* add/delete/update/has direcciones
+* add/delete/update/has teléfonos
 
 ## Tipos de emails, direcciones o télefonos
 | id | tipo    |
