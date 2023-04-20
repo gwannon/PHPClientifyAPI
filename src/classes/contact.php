@@ -182,6 +182,15 @@ class contactClientify {
   }
 
   /* OTHERS */
+  public function addUpdateNote($title, $text) {
+    $payload = [
+      "name" => $title,
+      "comment" => $text
+    ];
+    $response = curlClientfyCallPost("/contacts/{$this->id}/note/", json_encode($payload));
+  }
+
+
   public static function existsContact($id) {
     if (is_numeric($id) && $id > 0) {
       $response = curlClientfyCall("/contacts/{$id}/");

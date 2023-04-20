@@ -11,9 +11,9 @@ Los tags, emails, teléfonos y direcciones no se actualizan en la API hasta que 
 ## Todo
 * ADD|DELETE|UPDATE|HAS direcciones
 * ADD|DELETE|UPDATE|HAS teléfonos
-* ADD nota
 * ADD llamada
 * ADD cita
+* ADD usuario
 
 ## Tipos de emails, direcciones o télefonos
 | id | tipo    |
