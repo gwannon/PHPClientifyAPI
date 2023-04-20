@@ -142,7 +142,59 @@ class contactClientify {
   /* ADDRESSES */
 
   /* PHONES */
+  public function getPhones() { return $this->phones; }
+  
+  public function hasPhone($phone) { 
+    $phone = strtolower($phone);
+    if (in_array($phone, array_column(json_decode(json_encode($this->phones),TRUE), 'phone'))) {
+      return true;
+    }
+    return false;
+  }
 
+  public function addPhone($phone, $type) { 
+    $phone = strtolower($phone);
+    if (!$this->hasPhone($phone)) {
+      $this->phones[] = (object) [
+        "id" => 0,
+        "type" => $type,
+        "phone" => $phone
+      ];
+      return true;
+    }
+    return false;
+  }
+
+  public function deletePhone($phone) { 
+    $phone = strtolower($phone);
+    if ($this->hasPhone($phone)) {
+      $key = array_search($phone, array_column(json_decode(json_encode($this->phones),TRUE), 'phone'));
+      if(isset($this->phones[$key])) {
+        unset($this->phones[$key]);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public function updatePhones() {    
+    $deletePhones = [];
+    foreach($this->phones as $phone) {
+      if($phone->id == 0) $response = curlClientfyCallPost("/contacts/{$this->id}/phones/", json_encode(["phone" => $phone->phone, "type" => $phone->type]));
+    }
+
+    $response = curlClientfyCall("/contacts/{$this->id}/phones/");
+    $currentPhones = $response->results;
+    foreach($currentPhones as $currentPhone) {
+      $controlDelete = 0;
+      foreach($this->phones as $phone) {
+        if($phone->phone == $currentPhone->phone) {
+          $controlDelete = 1;
+        }
+      }
+      if($controlDelete == 0) $response = curlClientfyCallDelete("/contacts/{$this->id}/phones/{$currentPhone->id}/");
+    }
+  }
   /* TAGS */
   public function getTags() { return $this->tags; }
 
@@ -187,7 +239,14 @@ class contactClientify {
       "name" => $title,
       "comment" => $text
     ];
-    $response = curlClientfyCallPost("/contacts/{$this->id}/note/", json_encode($payload));
+    return curlClientfyCallPost("/contacts/{$this->id}/note/", json_encode($payload));
+  }
+
+  public function executeAutomation($autom_id) {
+    $payload = [
+      "contact_id" => $this->id
+    ];
+    return curlClientfyCallPost("/automations/{$autom_id}/add_contacts/", json_encode($payload));
   }
 
 
