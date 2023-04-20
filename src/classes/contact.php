@@ -89,7 +89,7 @@ class contactClientify {
   public function hasEmail($email) { 
     $email = strtolower($email);
     if (filter_var($email, FILTER_VALIDATE_EMAIL) && 
-      array_search($email, array_column(json_decode(json_encode($this->emails),TRUE), 'email'))) {
+      in_array($email, array_column(json_decode(json_encode($this->emails),TRUE), 'email'))) {
       return true;
     }
     return false;
@@ -97,8 +97,7 @@ class contactClientify {
 
   public function addEmail($email, $type) { 
     $email = strtolower($email);
-    if (filter_var($email, FILTER_VALIDATE_EMAIL) && 
-      !array_search($email, array_column(json_decode(json_encode($this->emails),TRUE), 'email'))) {
+    if (!$this->hasEmail($email)) {
       $this->emails[] = (object) [
         "id" => 0,
         "type" => $type,
@@ -110,10 +109,13 @@ class contactClientify {
   }
 
   public function deleteEmail($email) { 
-    $key = array_search(strtolower($email), array_column(json_decode(json_encode($this->emails),TRUE), 'email'));
-    if(isset($this->emails[$key])) {
-      unset($this->emails[$key]);
-      return true;
+    $email = strtolower($email);
+    if ($this->hasEmail($email)) {
+      $key = array_search($email, array_column(json_decode(json_encode($this->emails),TRUE), 'email'));
+      if(isset($this->emails[$key])) {
+        unset($this->emails[$key]);
+        return true;
+      }
     }
     return false;
   }
