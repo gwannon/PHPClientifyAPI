@@ -5,7 +5,8 @@ class contactClientify {
   public $firstName;
   public $lastName;
   private $emails;
-  public $phones;
+  private $phones;
+  private $addresses;
   private $tags;
   public $status;
 
@@ -33,6 +34,12 @@ class contactClientify {
       $this->lastName = $response->last_name;
       $this->emails = $response->emails;
       $this->phones = $response->phones;
+      if(isset($response->addresses)) {
+        $this->addresses = $response->addresses;
+      } else {
+        $addresses = curlClientfyCall("/contacts/{$this->id}/addresses/");
+        $this->addresses = $addresses->results;
+      }
       $this->tags = $response->tags;
       $this->status = $response->status;
     } else {
@@ -40,13 +47,13 @@ class contactClientify {
     }
   }
 
-  public function create($firstName, $lastName, $email, $phone = "", $status = "", $tags = []) {
+  public function create($firstName, $lastName, $email, $phone = "", $status = "cold-lead", $tags = []) {
     $payload = [
       "first_name" => $firstName,
       "last_name" => $lastName,
       "phone" => $phone,
       "email" => $email,
-      "status" => "lead-frio",
+      "status" => $status,
       "tags" => $tags,
     ];
     $response = curlClientfyCallPost("/contacts/", json_encode($payload));
@@ -56,6 +63,8 @@ class contactClientify {
       $this->lastName = $response->last_name;
       $this->emails = $response->emails;
       $this->phones = $response->phones;
+      $this->phones = $response->phones;
+      $this->addresses = [];
       $this->tags = $response->tags;
       $this->status = $response->status;
     }
@@ -140,6 +149,59 @@ class contactClientify {
   }
 
   /* ADDRESSES */
+  public function getAddresses() { return $this->addresses; }
+
+  public function addAddress($street, $city, $state, $country, $postal_code, $type) { 
+    $this->addresses[] = (object) [
+      "id" => 0,
+      "type" => $type,
+      "street" => $street,
+      "city" => $city,
+      "state" => $state,
+      "country" => $country,
+      "postal_code" => $postal_code
+    ];
+    return true;
+  }
+
+  public function deleteAddress($id_address) { 
+    $key = array_search($id_address, array_column(json_decode(json_encode($this->addresses),TRUE), 'id'));
+    if(isset($this->addresses[$key])) {
+      unset($this->addresses[$key]);
+      return true;
+    }
+    return false;
+  }
+
+  public function updateAddresses() {    
+    $deleteAddresses = [];
+    foreach($this->addresses as $key => $address) {
+      if($address->id == 0) {
+        $payload = [
+          "type" => $address->type,
+          "street" => $address->street,
+          "city" => $address->city,
+          "state" => $address->state,
+          "country" => $address->country,
+          "postal_code" => $address->postal_code
+        ];
+        $response = curlClientfyCallPost("/contacts/{$this->id}/addresses/", json_encode($payload));
+        $this->addresses[$key]->id = $response->id;
+      }
+    }
+
+    $response = curlClientfyCall("/contacts/{$this->id}/addresses/");
+    $currentAddresses = $response->results;
+    foreach($currentAddresses as $currentAddress) {
+      $controlDelete = 0;
+      foreach($this->addresses as $address) {
+        if($address->id == $currentAddress->id) {
+          $controlDelete = 1;
+        }
+      }
+      if($controlDelete == 0) $response = curlClientfyCallDelete("/contacts/{$this->id}/addresses/{$currentAddress->id}/");
+    }
+  }
 
   /* PHONES */
   public function getPhones() { return $this->phones; }
@@ -179,8 +241,11 @@ class contactClientify {
 
   public function updatePhones() {    
     $deletePhones = [];
-    foreach($this->phones as $phone) {
-      if($phone->id == 0) $response = curlClientfyCallPost("/contacts/{$this->id}/phones/", json_encode(["phone" => $phone->phone, "type" => $phone->type]));
+    foreach($this->phones as $key => $phone) {
+      if($phone->id == 0) {
+        $response = curlClientfyCallPost("/contacts/{$this->id}/phones/", json_encode(["phone" => $phone->phone, "type" => $phone->type]));
+        $this->phones[$key]->id = $response->id;
+      }
     }
 
     $response = curlClientfyCall("/contacts/{$this->id}/phones/");

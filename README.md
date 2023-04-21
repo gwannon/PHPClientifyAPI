@@ -10,7 +10,6 @@ Renombra config.dist.php como config.php y configura tu API Key de Clientify.
 Los tags, emails, teléfonos y direcciones no se actualizan en la API hasta que no se ejecuta las funciones updateTags(), updateEmails(), ... Es una forma de ahorrar llamadas a la API concentrándolas en una sola función.
 
 ## ToDo Contactos
-* ADD|DELETE|UPDATE|HAS direcciones
 * ADD llamada
 * ADD cita
 * ADD usuario
