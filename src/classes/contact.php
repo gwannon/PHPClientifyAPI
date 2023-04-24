@@ -9,15 +9,11 @@ class contactClientify {
   private $addresses;
   private $tags;
   public $status;
-
-  /*
-    Identifier	Type
-    ----------------
-    1	Work
-    2	Personal
-    3	Other
-    4	Main
-  */
+  private $updateData;
+  private $updateEmails;
+  private $updatePhones;
+  private $updateAddresses;
+  private $updateTags;
 
   public function __construct($id = 0, $createIfNotExists = false) {
 
@@ -42,6 +38,11 @@ class contactClientify {
       }
       $this->tags = $response->tags;
       $this->status = $response->status;
+      $this->updateData = false;
+      $this->updateEmails = false;
+      $this->updatePhones = false;
+      $this->updateAddresses = false;
+      $this->updateTags = false;
     } else {
       $this->id = 0;
     }
@@ -67,6 +68,11 @@ class contactClientify {
       $this->addresses = [];
       $this->tags = $response->tags;
       $this->status = $response->status;
+      $this->updateData = false;
+      $this->updateEmails = false;
+      $this->updatePhones = false;
+      $this->updateAddresses = false;
+      $this->updateTags = false;
     }
   }
 
@@ -80,6 +86,14 @@ class contactClientify {
     $this->tags = "";
     $this->status = "";
   }
+
+  public function update() {
+    if($this->updateData) $this->updateData();
+    if($this->updateEmails) $this->updateEmails();
+    if($this->updateAddresses) $this->updateAddresses();
+    if($this->updatePhones) $this->updatePhones();
+    if($this->updateTags) $this->updateTags();
+  } 
 
   public function updateData() {
     $payload = [
@@ -112,6 +126,7 @@ class contactClientify {
         "type" => $type,
         "email" => $email
       ];
+      $this->updateEmails = true;
       return true;
     }
     return false;
@@ -123,6 +138,7 @@ class contactClientify {
       $key = array_search($email, array_column(json_decode(json_encode($this->emails),TRUE), 'email'));
       if(isset($this->emails[$key])) {
         unset($this->emails[$key]);
+        $this->updateEmails = true;
         return true;
       }
     }
@@ -161,6 +177,7 @@ class contactClientify {
       "country" => $country,
       "postal_code" => $postal_code
     ];
+    $this->updateAddresses = true;
     return true;
   }
 
@@ -168,6 +185,7 @@ class contactClientify {
     $key = array_search($id_address, array_column(json_decode(json_encode($this->addresses),TRUE), 'id'));
     if(isset($this->addresses[$key])) {
       unset($this->addresses[$key]);
+      $this->updateAddresses = true;
       return true;
     }
     return false;
@@ -222,6 +240,7 @@ class contactClientify {
         "type" => $type,
         "phone" => $phone
       ];
+      $this->updatePhones = true;
       return true;
     }
     return false;
@@ -233,6 +252,7 @@ class contactClientify {
       $key = array_search($phone, array_column(json_decode(json_encode($this->phones),TRUE), 'phone'));
       if(isset($this->phones[$key])) {
         unset($this->phones[$key]);
+        $this->updatePhones = true;
         return true;
       }
     }
@@ -260,6 +280,7 @@ class contactClientify {
       if($controlDelete == 0) $response = curlClientfyCallDelete("/contacts/{$this->id}/phones/{$currentPhone->id}/");
     }
   }
+
   /* TAGS */
   public function getTags() { return $this->tags; }
 
@@ -268,7 +289,15 @@ class contactClientify {
     else return false;
   }
 
-  public function addTag($tag) { $this->tags[] = $tag; return true; }
+  public function addTag($tag) { 
+    $tag = strtolower($tag);
+    if (!$this->hasTag($tag)) {
+      $this->tags[] = $tag; 
+      $this->updateTags = true;
+      return true;
+    }
+    return false;
+  }
 
   public function deleteTag($tag) { $this->tags = array_diff($this->tags, [$tag]); }
       
@@ -313,7 +342,6 @@ class contactClientify {
     ];
     return curlClientfyCallPost("/automations/{$autom_id}/add_contacts/", json_encode($payload));
   }
-
 
   public static function existsContact($id) {
     if (is_numeric($id) && $id > 0) {
