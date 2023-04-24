@@ -2,13 +2,13 @@
 
 class contactClientify {
   public $id;
-  public $firstName;
-  public $lastName;
+  private $firstName;
+  private $lastName;
   private $emails;
   private $phones;
   private $addresses;
   private $tags;
-  public $status;
+  private $status;
   private $updateData;
   private $updateEmails;
   private $updatePhones;
@@ -95,13 +95,24 @@ class contactClientify {
     if($this->updateTags) $this->updateTags();
   } 
 
+  /* Data */
+  public function getFirstName() { return $this->firstName; }
+
+  public function getLastName() { return $this->lastName; }
+
+  public function getStatus() { return $this->status; }
+
+  public function setFirstName($firstName) { $this->firstName = $firstName; $this->updateData = true; }
+
+  public function setLastName($lastName) { $this->lastName = $lastName; $this->updateData = true; }
+
+  public function setStatus($status) { $this->status = $status; $this->updateData = true; }
+
   public function updateData() {
     $payload = [
       "first_name" => $this->firstName,
       "last_name" => $this->lastName,
       "status" => $this->status,
-      //"phone" => $this->phone,
-      //"email" => $this->email,
     ];
     $response = curlClientfyCallPut("/contacts/{$this->id}/", json_encode($payload));
   }
