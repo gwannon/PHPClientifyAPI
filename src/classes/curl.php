@@ -26,10 +26,10 @@ function curlClientfyCall($link, $request = 'GET', $payload = false) {
 
   curl_close($curl);
   if (in_array($httpcode, array(200, 201, 204))) {
-    if(CLIENTIFY_LOG_API_CALLS) curlClientfyLog("logs", $now, $link, $request, $payload );
+    if(CLIENTIFY_LOG_API_CALLS) curlClientfyLog("logs", $link, $request, $httpcode, $payload );
     return $json;
   } else {
-    if(CLIENTIFY_LOG_API_CALLS) curlClientfyLog("errors", $now, $link, $request, $payload, $httpcode, json_encode($json));
+    if(CLIENTIFY_LOG_API_CALLS) curlClientfyLog("errors", $link, $request, $httpcode, $payload, json_encode($json));
     //throw new Exception($httpcode." - ".json_encode($json));
     return false;
   }
@@ -48,9 +48,12 @@ function curlClientfyCallPost($link, $payload) { return curlClientfyCall($link, 
 function curlClientfyCallDelete($link) { return curlClientfyCall($link, "DELETE"); }
 
 //Log system
-function curlClientfyLog($file, $now, $link, $request, $payload, $httpcode = "", $json = "") {
+function curlClientfyLog($file, $link, $request, $httpcode, $payload = "", $json = "") {
   $f = fopen(dirname(__FILE__)."/../logs/".$file.".txt", "a+");
-  $line = date("Y-m-d H:i:s")."|".$now."|".$link."|".$request."|".$payload."|".$httpcode."|".$json."\n";
+  $line = date("Y-m-d H:i:s")."|".$link."|".$request."|".$httpcode;
+  if($payload != '') $line .= "|".$payload;
+  if($json != '') $line .= "|".$json;
+  $line .= "\n";
   fwrite($f, $line);
   fclose($f);
 }
