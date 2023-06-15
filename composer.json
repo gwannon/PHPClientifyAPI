@@ -5,7 +5,7 @@
 
     "autoload": {
         "psr-4": {
-            "Gwannon\\PHPClientifyAPI\\": "src/classes"
+            "Gwannon\\PHPClientifyAPI\\": "src"
         }
     }
 

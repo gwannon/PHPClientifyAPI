@@ -4,7 +4,7 @@ Además de añadir/quitar emails, teléfonos y etiquetas. Por último permite ac
 el contacto sin necesidad de cumplir con ningún lanzador.
 
 ## Instalación
-Renombra config.dist.php como config.php y configura tu API Key de Clientify.
+En config.dist.php tienes el código para establecer la conexión con tu API Key de Clientify para que metas en tu proyecto.
 
 ## Notas
 Los tags, emails, teléfonos y direcciones no se actualizan en la API hasta que no se ejecuta la función update() (que ejecuta a su vez updateTags(), updateEmails(), ...) Es una forma de ahorrar llamadas a la API concentrándolas en una sola función. Lo último que se debería hacer es actualizar el cotnacto. El contacto sabe que se ha modificado y que actualziaciones debe ejecutar.
