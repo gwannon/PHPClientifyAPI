@@ -1,5 +1,7 @@
 <?php
 
+namespace Gwannon\PHPClientifyAPI;
+
 class contactClientify {
   public $id;
   private $firstName;

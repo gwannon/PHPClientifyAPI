@@ -1,5 +1,6 @@
 <?php
 
+namespace Gwannon\PHPClientifyAPI;
 
 //Funciones CURL-----------------------------
 function curlClientfyCall($link, $request = 'GET', $payload = false) {
