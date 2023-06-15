@@ -1,4 +1,12 @@
 {
+
     "name": "gwannon/phpclientifyapi",
-    "type": "library"
+    "type": "library",
+
+    "autoload": {
+        "psr-4": {
+            "Gwannon\\PHPClientifyAPI\\": "src/classes"
+        }
+    }
+
 }
