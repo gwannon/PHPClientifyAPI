@@ -20,9 +20,9 @@ class contactClientify {
   public function __construct($id = 0, $createIfNotExists = false) {
 
     if (is_numeric($id) && $id > 0) {
-      $response = curlClientfyCall("/contacts/{$id}/");
+      $response = contactClientify::curlClientfyCall("/contacts/{$id}/");
     } else if (filter_var($id, FILTER_VALIDATE_EMAIL)) {
-      $temp = curlClientfyCall("/contacts/?query={$id}&email={$id}");
+      $temp = contactClientify::curlClientfyCall("/contacts/?query={$id}&email={$id}");
       $response = (count($temp->results) > 0 ? $temp->results[0] : false);
     }
 
@@ -35,7 +35,7 @@ class contactClientify {
       if(isset($response->addresses)) {
         $this->addresses = $response->addresses;
       } else {
-        $addresses = curlClientfyCall("/contacts/{$this->id}/addresses/");
+        $addresses = contactClientify::curlClientfyCall("/contacts/{$this->id}/addresses/");
         $this->addresses = $addresses->results;
       }
       $this->tags = $response->tags;
@@ -59,7 +59,7 @@ class contactClientify {
       "status" => $status,
       "tags" => $tags,
     ];
-    $response = curlClientfyCallPost("/contacts/", json_encode($payload));
+    $response = contactClientify::curlClientfyCallPost("/contacts/", json_encode($payload));
     if(isset($response) && is_object($response)) {
       $this->id = $response->id;
       $this->firstName = $response->first_name;
@@ -79,7 +79,7 @@ class contactClientify {
   }
 
   public function delete() {
-    if (is_numeric($id) && $id > 0) $response = curlClientfyCallDelete("/contacts/{$this->id}/");
+    if (is_numeric($id) && $id > 0) $response = contactClientify::curlClientfyCallDelete("/contacts/{$this->id}/");
     $this->id = 0;
     $this->firstName = "";
     $this->lastName = "";
@@ -116,7 +116,7 @@ class contactClientify {
       "last_name" => $this->lastName,
       "status" => $this->status,
     ];
-    $response = curlClientfyCallPut("/contacts/{$this->id}/", json_encode($payload));
+    $response = contactClientify::curlClientfyCallPut("/contacts/{$this->id}/", json_encode($payload));
   }
 
   /* EMAILS */
@@ -161,10 +161,10 @@ class contactClientify {
   public function updateEmails() {    
     $deleteEmails = [];
     foreach($this->emails as $email) {
-      if($email->id == 0) $response = curlClientfyCallPost("/contacts/{$this->id}/emails/", json_encode(["email" => $email->email, "type" => $email->type]));
+      if($email->id == 0) $response = contactClientify::curlClientfyCallPost("/contacts/{$this->id}/emails/", json_encode(["email" => $email->email, "type" => $email->type]));
     }
 
-    $response = curlClientfyCall("/contacts/{$this->id}/emails/");
+    $response = contactClientify::curlClientfyCall("/contacts/{$this->id}/emails/");
     $currentEmails = $response->results;
     foreach($currentEmails as $currentEmail) {
       $controlDelete = 0;
@@ -173,7 +173,7 @@ class contactClientify {
           $controlDelete = 1;
         }
       }
-      if($controlDelete == 0) $response = curlClientfyCallDelete("/contacts/{$this->id}/emails/{$currentEmail->id}/");
+      if($controlDelete == 0) $response = contactClientify::curlClientfyCallDelete("/contacts/{$this->id}/emails/{$currentEmail->id}/");
     }
   }
 
@@ -216,12 +216,12 @@ class contactClientify {
           "country" => $address->country,
           "postal_code" => $address->postal_code
         ];
-        $response = curlClientfyCallPost("/contacts/{$this->id}/addresses/", json_encode($payload));
+        $response = contactClientify::curlClientfyCallPost("/contacts/{$this->id}/addresses/", json_encode($payload));
         $this->addresses[$key]->id = $response->id;
       }
     }
 
-    $response = curlClientfyCall("/contacts/{$this->id}/addresses/");
+    $response = contactClientify::curlClientfyCall("/contacts/{$this->id}/addresses/");
     $currentAddresses = $response->results;
     foreach($currentAddresses as $currentAddress) {
       $controlDelete = 0;
@@ -230,7 +230,7 @@ class contactClientify {
           $controlDelete = 1;
         }
       }
-      if($controlDelete == 0) $response = curlClientfyCallDelete("/contacts/{$this->id}/addresses/{$currentAddress->id}/");
+      if($controlDelete == 0) $response = contactClientify::curlClientfyCallDelete("/contacts/{$this->id}/addresses/{$currentAddress->id}/");
     }
   }
 
@@ -276,12 +276,12 @@ class contactClientify {
     $deletePhones = [];
     foreach($this->phones as $key => $phone) {
       if($phone->id == 0) {
-        $response = curlClientfyCallPost("/contacts/{$this->id}/phones/", json_encode(["phone" => $phone->phone, "type" => $phone->type]));
+        $response = contactClientify::curlClientfyCallPost("/contacts/{$this->id}/phones/", json_encode(["phone" => $phone->phone, "type" => $phone->type]));
         $this->phones[$key]->id = $response->id;
       }
     }
 
-    $response = curlClientfyCall("/contacts/{$this->id}/phones/");
+    $response = contactClientify::curlClientfyCall("/contacts/{$this->id}/phones/");
     $currentPhones = $response->results;
     foreach($currentPhones as $currentPhone) {
       $controlDelete = 0;
@@ -290,7 +290,7 @@ class contactClientify {
           $controlDelete = 1;
         }
       }
-      if($controlDelete == 0) $response = curlClientfyCallDelete("/contacts/{$this->id}/phones/{$currentPhone->id}/");
+      if($controlDelete == 0) $response = contactClientify::curlClientfyCallDelete("/contacts/{$this->id}/phones/{$currentPhone->id}/");
     }
   }
 
@@ -317,7 +317,7 @@ class contactClientify {
   public function updateTags() {    
     $deleteTags = [];
     $newTags = [];
-    $response = curlClientfyCall("/contacts/{$this->id}/tags/");
+    $response = contactClientify::curlClientfyCall("/contacts/{$this->id}/tags/");
     $currentTags = $response->results;
     foreach($this->tags as $tag) {
       $controlNew = 0;
@@ -326,7 +326,7 @@ class contactClientify {
           $controlNew = 1;
         }
       }
-      if($controlNew == 0) $response = curlClientfyCallPost("/contacts/{$this->id}/tags/", json_encode(["name" => $tag]));
+      if($controlNew == 0) $response = contactClientify::curlClientfyCallPost("/contacts/{$this->id}/tags/", json_encode(["name" => $tag]));
     }
 
     foreach($currentTags as $currentTag) {
@@ -336,7 +336,7 @@ class contactClientify {
           $controlDelete = 1;
         }
       }
-      if($controlDelete == 0) $response = curlClientfyCallDelete("/contacts/{$this->id}/tags/{$currentTag->id}/");
+      if($controlDelete == 0) $response = contactClientify::curlClientfyCallDelete("/contacts/{$this->id}/tags/{$currentTag->id}/");
     }
   }
 
@@ -346,21 +346,21 @@ class contactClientify {
       "name" => $title,
       "comment" => $text
     ];
-    return curlClientfyCallPost("/contacts/{$this->id}/note/", json_encode($payload));
+    return contactClientify::curlClientfyCallPost("/contacts/{$this->id}/note/", json_encode($payload));
   }
 
   public function executeAutomation($autom_id) {
     $payload = [
       "contact_id" => $this->id
     ];
-    return curlClientfyCallPost("/automations/{$autom_id}/add_contacts/", json_encode($payload));
+    return contactClientify::curlClientfyCallPost("/automations/{$autom_id}/add_contacts/", json_encode($payload));
   }
 
   public static function existsContact($id) {
     if (is_numeric($id) && $id > 0) {
-      $response = curlClientfyCall("/contacts/{$id}/");
+      $response = contactClientify::curlClientfyCall("/contacts/{$id}/");
     } else if (filter_var($id, FILTER_VALIDATE_EMAIL)) {
-      $temp = curlClientfyCall("/contacts/?query={$id}&email={$id}");
+      $temp = contactClientify::curlClientfyCall("/contacts/?query={$id}&email={$id}");
       $response = (count($temp->results) > 0 ? $temp->results[0] : false);
     }
     if(isset($response) && 
@@ -370,62 +370,61 @@ class contactClientify {
       $response->id > 0) return true;
     return false;
   }
-}
 
-//Funciones CURL-----------------------------
-function curlClientfyCall($link, $request = 'GET', $payload = false) {
-  $now = date("Y-m-d H:i:s");
-  $curl = curl_init();
-  $headers[] = 'Authorization: Token '.CLIENTIFY_API_KEY;
-  curl_setopt($curl, CURLOPT_URL, CLIENTIFY_API_URL.$link);
-  curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 1);
-  curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-  curl_setopt($curl, CURLOPT_ENCODING, '');
-  curl_setopt($curl, CURLOPT_MAXREDIRS, 10);
-  curl_setopt($curl, CURLOPT_TIMEOUT, 0);
-  curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-  if (in_array($request, array("PUT", "POST", "DELETE"))) curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $request);
-  if ($payload) {
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $payload);
-    $headers[] = 'Content-Type: application/json';
+  //Funciones CURL-----------------------------
+  static private function curlClientfyCall($link, $request = 'GET', $payload = false) {
+    $now = date("Y-m-d H:i:s");
+    $curl = curl_init();
+    $headers[] = 'Authorization: Token '.CLIENTIFY_API_KEY;
+    curl_setopt($curl, CURLOPT_URL, CLIENTIFY_API_URL.$link);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 1);
+    curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+    curl_setopt($curl, CURLOPT_ENCODING, '');
+    curl_setopt($curl, CURLOPT_MAXREDIRS, 10);
+    curl_setopt($curl, CURLOPT_TIMEOUT, 0);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+    if (in_array($request, array("PUT", "POST", "DELETE"))) curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $request);
+    if ($payload) {
+      curl_setopt($curl, CURLOPT_POSTFIELDS, $payload);
+      $headers[] = 'Content-Type: application/json';
+    }
+    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+    $response = curl_exec($curl);
+    $json = json_decode($response);
+    $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+    curl_close($curl);
+    if (in_array($httpcode, array(200, 201, 204))) {
+      if(CLIENTIFY_LOG_API_CALLS) contactClientify::curlClientfyLog("logs", $link, $request, $httpcode, $payload );
+      return $json;
+    } else {
+      if(CLIENTIFY_LOG_API_CALLS) contactClientify::curlClientfyLog("errors", $link, $request, $httpcode, $payload, json_encode($json));
+      //throw new Exception($httpcode." - ".json_encode($json));
+      return false;
+    }
   }
-  curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-  $response = curl_exec($curl);
-  $json = json_decode($response);
-  $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-  curl_close($curl);
-  if (in_array($httpcode, array(200, 201, 204))) {
-    if(CLIENTIFY_LOG_API_CALLS) curlClientfyLog("logs", $link, $request, $httpcode, $payload );
-    return $json;
-  } else {
-    if(CLIENTIFY_LOG_API_CALLS) curlClientfyLog("errors", $link, $request, $httpcode, $payload, json_encode($json));
-    //throw new Exception($httpcode." - ".json_encode($json));
-    return false;
+  //GET
+  static private function curlClientfyCallGet($link) { return contactClientify::curlClientfyCall($link); }
+
+  //PUT
+  static private function curlClientfyCallPut($link, $payload) { return contactClientify::curlClientfyCall($link, "PUT", $payload); }
+
+  //POST
+  static private function curlClientfyCallPost($link, $payload) { return contactClientify::curlClientfyCall($link, "POST", $payload); }
+
+  //DELETE
+  static private function curlClientfyCallDelete($link) { return contactClientify::curlClientfyCall($link, "DELETE"); }
+
+  //Log system
+  static private function curlClientfyLog($file, $link, $request, $httpcode, $payload = "", $json = "") {
+    $f = fopen(dirname(__FILE__)."/../logs/".$file.".txt", "a+");
+    $line = date("Y-m-d H:i:s")."|".$link."|".$request."|".$httpcode;
+    if($payload != '') $line .= "|".$payload;
+    if($json != '') $line .= "|".$json;
+    $line .= "\n";
+    fwrite($f, $line);
+    fclose($f);
   }
 }
-
-//GET
-function curlClientfyCallGet($link) { return curlClientfyCall($link); }
-
-//PUT
-function curlClientfyCallPut($link, $payload) { return curlClientfyCall($link, "PUT", $payload); }
-
-//POST
-function curlClientfyCallPost($link, $payload) { return curlClientfyCall($link, "POST", $payload); }
-
-//DELETE
-function curlClientfyCallDelete($link) { return curlClientfyCall($link, "DELETE"); }
-
-//Log system
-function curlClientfyLog($file, $link, $request, $httpcode, $payload = "", $json = "") {
-  $f = fopen(dirname(__FILE__)."/../logs/".$file.".txt", "a+");
-  $line = date("Y-m-d H:i:s")."|".$link."|".$request."|".$httpcode;
-  if($payload != '') $line .= "|".$payload;
-  if($json != '') $line .= "|".$json;
-  $line .= "\n";
-  fwrite($f, $line);
-  fclose($f);
-}
-
