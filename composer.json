@@ -2,7 +2,28 @@
 
     "name": "gwannon/phpclientifyapi",
     "type": "library",
-
+    "description": "PHP Class to work with Clientify API",
+    "keywords": [
+        "gwannon",
+        "clientify",
+        "api",
+        "Clientify"
+    ],
+    "homepage": "https://github.com/gwannon/PHPClientifyAPI",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Jorge Monclús",
+            "email": "monclus.jorge@gmail.com",
+            "homepage": "https://github.com/gwannon/",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "ext-curl": "*",
+        "ext-json": "*"
+    },
     "autoload": {
         "psr-4": {
             "Gwannon\\PHPClientifyAPI\\": "src"
