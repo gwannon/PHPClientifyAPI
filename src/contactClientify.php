@@ -47,6 +47,9 @@ class contactClientify {
       $this->updateTags = false;
     } else {
       $this->id = 0;
+      if($createIfNotExists && filter_var($id, FILTER_VALIDATE_EMAIL)) {
+        $this->create("", "", $id);
+      }
     }
   }
 
