@@ -11,6 +11,7 @@ class contactClientify {
   private $addresses;
   private $tags;
   private $status;
+  private $custom_fields;
   private $updateData;
   private $updateEmails;
   private $updatePhones;
@@ -25,7 +26,7 @@ class contactClientify {
       $temp = contactClientify::curlClientfyCall("/contacts/?query={$id}&email={$id}");
       $response = (count($temp->results) > 0 ? $temp->results[0] : false);
     }
-
+    
     if(isset($response) && is_object($response)) {
       $this->id = $response->id;
       $this->firstName = $response->first_name;
@@ -37,6 +38,16 @@ class contactClientify {
       } else {
         $addresses = contactClientify::curlClientfyCall("/contacts/{$this->id}/addresses/");
         $this->addresses = $addresses->results;
+      }
+      if(isset($response->custom_fields) && count($response->custom_fields) > 0) {
+        foreach ($response->custom_fields as $custom_field) {
+          $this->custom_fields[] = [
+            "field" => $custom_field->field,
+            "value" => $custom_field->value
+          ];
+        }
+      } else {
+        $this->custom_fields = [];
       }
       $this->tags = $response->tags;
       $this->status = $response->status;
@@ -63,6 +74,8 @@ class contactClientify {
       "tags" => $tags,
     ];
     $response = contactClientify::curlClientfyCallPost("/contacts/", json_encode($payload));
+
+
     if(isset($response) && is_object($response)) {
       $this->id = $response->id;
       $this->firstName = $response->first_name;
@@ -71,6 +84,7 @@ class contactClientify {
       $this->phones = $response->phones;
       $this->phones = $response->phones;
       $this->addresses = [];
+      $this->custom_fields = [];
       $this->tags = $response->tags;
       $this->status = $response->status;
       $this->updateData = false;
@@ -106,6 +120,12 @@ class contactClientify {
   public function getLastName() { return $this->lastName; }
 
   public function getStatus() { return $this->status; }
+
+  public function getCustomField($field) { 
+    $key = array_search($field, array_column($this->custom_fields, 'field'));
+    if($key) return $this->custom_fields[$key];
+    return false;
+  }
 
   public function setFirstName($firstName) { $this->firstName = $firstName; $this->updateData = true; }
 
