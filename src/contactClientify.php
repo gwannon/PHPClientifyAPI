@@ -13,6 +13,7 @@ class contactClientify {
   private $status;
   private $custom_fields;
   private $updateData;
+  private $updateCustomFields;
   private $updateEmails;
   private $updatePhones;
   private $updateAddresses;
@@ -52,6 +53,7 @@ class contactClientify {
       $this->tags = $response->tags;
       $this->status = $response->status;
       $this->updateData = false;
+      $this->updateCustomFields = false;
       $this->updateEmails = false;
       $this->updatePhones = false;
       $this->updateAddresses = false;
@@ -88,6 +90,7 @@ class contactClientify {
       $this->tags = $response->tags;
       $this->status = $response->status;
       $this->updateData = false;
+      $this->updateCustomFields = false;
       $this->updateEmails = false;
       $this->updatePhones = false;
       $this->updateAddresses = false;
@@ -108,6 +111,7 @@ class contactClientify {
 
   public function update() {
     if($this->updateData) $this->updateData();
+    if($this->updateCustomFields) $this->updateCustomFields();
     if($this->updateEmails) $this->updateEmails();
     if($this->updateAddresses) $this->updateAddresses();
     if($this->updatePhones) $this->updatePhones();
@@ -123,7 +127,7 @@ class contactClientify {
 
   public function getCustomField($field) { 
     $key = array_search($field, array_column($this->custom_fields, 'field'));
-    if($key) return $this->custom_fields[$key];
+    if($key >= 0 && $key !== '' && isset($this->custom_fields[$key]['field']) &&$this->custom_fields[$key]['field'] == $field) return $this->custom_fields[$key];
     return false;
   }
 
@@ -133,12 +137,43 @@ class contactClientify {
 
   public function setStatus($status) { $this->status = $status; $this->updateData = true; }
 
+  public function setCustomField($field, $value) { 
+    $control = 0;
+    foreach($this->custom_fields as $key => $custom_field) {
+      if($custom_field['field'] == $field) {
+        $this->custom_fields[$key]['field'] = $field;
+        $this->custom_fields[$key]['value'] = $value;
+        $control = 1;
+        $this->updateCustomFields = true; 
+        break;
+      }
+    }
+    if($control == 0) {
+      $this->custom_fields[] = [
+        'field' => $field,
+        'value' => $value
+      ];
+      $this->updateCustomFields = true; 
+    }
+  }
+
   public function updateData() {
     $payload = [
       "first_name" => $this->firstName,
       "last_name" => $this->lastName,
       "status" => $this->status,
     ];
+    $response = contactClientify::curlClientfyCallPut("/contacts/{$this->id}/", json_encode($payload));
+  }
+
+  public function updateCustomFields() {
+    $payload['custom_fields'] = [];
+    foreach($this->custom_fields as $key => $custom_field) {
+      $payload['custom_fields'][$key] = [
+        'field' => $custom_field['field'],
+        'value' => $custom_field['value']
+      ];
+    }
     $response = contactClientify::curlClientfyCallPut("/contacts/{$this->id}/", json_encode($payload));
   }
 
