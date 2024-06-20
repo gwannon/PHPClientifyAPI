@@ -12,6 +12,7 @@ class contactClientify {
   private $tags;
   private $status;
   private $custom_fields;
+  private $picture;
   private $updateData;
   private $updateCustomFields;
   private $updateEmails;
@@ -27,7 +28,6 @@ class contactClientify {
       $temp = contactClientify::curlClientfyCall("/contacts/?query={$id}&email={$id}");
       $response = (count($temp->results) > 0 ? $temp->results[0] : false);
     }
-    
     if(isset($response) && is_object($response)) {
       $this->id = $response->id;
       $this->firstName = $response->first_name;
@@ -40,6 +40,7 @@ class contactClientify {
         $addresses = contactClientify::curlClientfyCall("/contacts/{$this->id}/addresses/");
         $this->addresses = $addresses->results;
       }
+      $this->picture = $response->picture_url;
       if(isset($response->custom_fields) && count($response->custom_fields) > 0) {
         foreach ($response->custom_fields as $custom_field) {
           $this->custom_fields[] = [
@@ -87,6 +88,7 @@ class contactClientify {
       $this->phones = $response->phones;
       $this->addresses = [];
       $this->custom_fields = [];
+      $this->picture = "";
       $this->tags = $response->tags;
       $this->status = $response->status;
       $this->updateData = false;
@@ -125,6 +127,8 @@ class contactClientify {
 
   public function getStatus() { return $this->status; }
 
+  public function getPicture() { return $this->picture; }
+
   public function getCustomField($field) { 
     $key = array_search($field, array_column($this->custom_fields, 'field'));
     if($key >= 0 && $key !== '' && isset($this->custom_fields[$key]['field']) &&$this->custom_fields[$key]['field'] == $field) return $this->custom_fields[$key];
@@ -136,6 +140,8 @@ class contactClientify {
   public function setLastName($lastName) { $this->lastName = $lastName; $this->updateData = true; }
 
   public function setStatus($status) { $this->status = $status; $this->updateData = true; }
+
+  public function setPicture($picture) { $this->picture = $picture; $this->updateData = true; }
 
   public function setCustomField($field, $value) { 
     $control = 0;
@@ -163,7 +169,11 @@ class contactClientify {
       "last_name" => $this->lastName,
       "status" => $this->status,
     ];
+
+    if(isset($this->picture) && $this->picture != '') $payload['picture_url'] = $this->picture;
+    //echo "PAYLOAD---------------<pre>"; print_r($payload); echo "</pre>";
     $response = contactClientify::curlClientfyCallPut("/contacts/{$this->id}/", json_encode($payload));
+    //echo "RESPONSE-------------<pre>"; print_r($response);  echo "</pre>";
   }
 
   public function updateCustomFields() {
@@ -179,6 +189,13 @@ class contactClientify {
 
   /* EMAILS */
   public function getEmails() { return $this->emails; }
+  public function getEmailsByType($type) {
+    $emails = [];
+    foreach($this->emails as $email) {
+      if($email->type == $type) $emails [] = $email;
+    }
+    return $emails; 
+  } //1=trabajo
   
   public function hasEmail($email) { 
     $email = strtolower($email);
@@ -294,6 +311,13 @@ class contactClientify {
 
   /* PHONES */
   public function getPhones() { return $this->phones; }
+  public function getPhonesByType($type) {
+    $phones = [];
+    foreach($this->phones as $phone) {
+      if($phone->type == $type) $phones [] = $phone;
+    }
+    return $phones; 
+  } //3=trabajo
   
   public function hasPhone($phone) { 
     $phone = strtolower($phone);
