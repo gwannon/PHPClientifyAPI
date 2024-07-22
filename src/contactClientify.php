@@ -34,7 +34,7 @@ class contactClientify {
       $response = (count($temp->results) > 0 ? $temp->results[0] : false);
     }
 
-    print_r($response);
+    //print_r($response);
 
 
     if(isset($response) && is_object($response)) {
