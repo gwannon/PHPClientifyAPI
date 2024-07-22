@@ -6,6 +6,9 @@ class contactClientify {
   public $id;
   private $firstName;
   private $lastName;
+  private $position;
+  //private $company;
+  private $websites;
   private $emails;
   private $phones;
   private $addresses;
@@ -13,12 +16,14 @@ class contactClientify {
   private $status;
   private $custom_fields;
   private $picture;
+  private $linkedin_url;
   private $updateData;
   private $updateCustomFields;
   private $updateEmails;
   private $updatePhones;
   private $updateAddresses;
   private $updateTags;
+  private $updateWebsites;
 
   public function __construct($id = 0, $createIfNotExists = false) {
 
@@ -28,12 +33,20 @@ class contactClientify {
       $temp = contactClientify::curlClientfyCall("/contacts/?query={$id}&email={$id}");
       $response = (count($temp->results) > 0 ? $temp->results[0] : false);
     }
+
+    print_r($response);
+
+
     if(isset($response) && is_object($response)) {
       $this->id = $response->id;
       $this->firstName = $response->first_name;
       $this->lastName = $response->last_name;
       $this->emails = $response->emails;
       $this->phones = $response->phones;
+      $this->position = $response->title;
+      //$this->company = $response->company;
+      $this->websites = $response->websites;
+      $this->linkedin_url = $response->linkedin_url;
       if(isset($response->addresses)) {
         $this->addresses = $response->addresses;
       } else {
@@ -59,6 +72,7 @@ class contactClientify {
       $this->updatePhones = false;
       $this->updateAddresses = false;
       $this->updateTags = false;
+      $this->updateWebsites = false;
     } else {
       $this->id = 0;
       if($createIfNotExists && filter_var($id, FILTER_VALIDATE_EMAIL)) {
@@ -85,7 +99,10 @@ class contactClientify {
       $this->lastName = $response->last_name;
       $this->emails = $response->emails;
       $this->phones = $response->phones;
-      $this->phones = $response->phones;
+      $this->position = "";
+      //$this->company = "";
+      $this->websites = [];
+      $this->linkedin_url = "";
       $this->addresses = [];
       $this->custom_fields = [];
       $this->picture = "";
@@ -97,6 +114,7 @@ class contactClientify {
       $this->updatePhones = false;
       $this->updateAddresses = false;
       $this->updateTags = false;
+      $this->updateWebsites = false;
     }
   }
 
@@ -107,6 +125,13 @@ class contactClientify {
     $this->lastName = "";
     $this->emails = "";
     $this->phones = "";
+    $this->position = "";
+    //$this->company = "";
+    $this->websites = [];
+    $this->linkedin_url = "";
+    $this->addresses = "";
+    $this->custom_fields = "";
+    $this->picture = "";
     $this->tags = "";
     $this->status = "";
   }
@@ -117,6 +142,7 @@ class contactClientify {
     if($this->updateEmails) $this->updateEmails();
     if($this->updateAddresses) $this->updateAddresses();
     if($this->updatePhones) $this->updatePhones();
+    if($this->updateWebsites) $this->updateWebsites();
     if($this->updateTags) $this->updateTags();
   } 
 
@@ -124,6 +150,10 @@ class contactClientify {
   public function getFirstName() { return $this->firstName; }
 
   public function getLastName() { return $this->lastName; }
+
+  public function getPosition() { return $this->position; }
+
+  //public function getCompany() { return $this->company; }
 
   public function getStatus() { return $this->status; }
 
@@ -135,9 +165,15 @@ class contactClientify {
     return false;
   }
 
+  public function getLinkedinUrl() { return $this->linkedin_url; }
+
   public function setFirstName($firstName) { $this->firstName = $firstName; $this->updateData = true; }
 
   public function setLastName($lastName) { $this->lastName = $lastName; $this->updateData = true; }
+
+  //public function setCompany($company) { $this->company = $company; $this->updateData = true; }
+
+  public function setPosition($position) { $this->position = $position; $this->updateData = true; }
 
   public function setStatus($status) { $this->status = $status; $this->updateData = true; }
 
@@ -163,11 +199,17 @@ class contactClientify {
     }
   }
 
+  public function setLinkedinUrl($linkedin_url) { $this->linkedin_url = $linkedin_url; $this->updateData = true; }
+
+
   public function updateData() {
     $payload = [
       "first_name" => $this->firstName,
       "last_name" => $this->lastName,
+      //"company" => $this->company,
+      "title" => $this->position,
       "status" => $this->status,
+      "linkedin_url" => $this->linkedin_url,
     ];
 
     if(isset($this->picture) && $this->picture != '') $payload['picture_url'] = $this->picture;
@@ -249,6 +291,71 @@ class contactClientify {
         }
       }
       if($controlDelete == 0) $response = contactClientify::curlClientfyCallDelete("/contacts/{$this->id}/emails/{$currentEmail->id}/");
+    }
+  }
+
+  /* WEBSITES */
+  public function getWebsites() { return $this->websites; }
+  public function getWebsitesByType($type) {
+    $websites = [];
+    foreach($this->websites as $website) {
+      if($website->type == $type) $websites [] = $website;
+    }
+    return $websites; 
+  } //1=trabajo
+  
+  public function hasWebsite($website) { 
+    $website = strtolower($website);
+    if (filter_var($website, FILTER_VALIDATE_EMAIL) && 
+      in_array($website, array_column(json_decode(json_encode($this->websites),TRUE), 'website'))) {
+      return true;
+    }
+    return false;
+  }
+
+  public function addWebsite($website, $type) { 
+    $website = strtolower($website);
+    if (!$this->hasWebsite($website)) {
+      $this->websites[] = (object) [
+        "id" => 0,
+        "type" => $type,
+        "website" => $website
+      ];
+      $this->updateWebsites = true;
+      return true;
+    }
+    return false;
+  }
+
+  public function deleteWebsite($website) { 
+    $website = strtolower($website);
+    if ($this->hasWebsite($website)) {
+      $key = array_search($website, array_column(json_decode(json_encode($this->websites),TRUE), 'website'));
+      if(isset($this->websites[$key])) {
+        unset($this->websites[$key]);
+        $this->updateWebsites = true;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public function updateWebsites() {    
+    $deleteWebsites = [];
+    foreach($this->websites as $website) {
+      if($website->id == 0) $response = contactClientify::curlClientfyCallPost("/contacts/{$this->id}/websites/", json_encode(["website" => $website->website, "type" => $website->type]));
+    }
+
+    $response = contactClientify::curlClientfyCall("/contacts/{$this->id}/websites/");
+    $currentWebsites = $response->results;
+    foreach($currentWebsites as $currentWebsite) {
+      $controlDelete = 0;
+      foreach($this->websites as $website) {
+        if($website->website == $currentWebsite->website) {
+          $controlDelete = 1;
+        }
+      }
+      if($controlDelete == 0) $response = contactClientify::curlClientfyCallDelete("/contacts/{$this->id}/websites/{$currentWebsite->id}/");
     }
   }
 
