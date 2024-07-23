@@ -280,7 +280,6 @@ class contactClientify {
     foreach($this->emails as $email) {
       if($email->id == 0) $response = contactClientify::curlClientfyCallPost("/contacts/{$this->id}/emails/", json_encode(["email" => $email->email, "type" => $email->type]));
     }
-
     $response = contactClientify::curlClientfyCall("/contacts/{$this->id}/emails/");
     $currentEmails = $response->results;
     foreach($currentEmails as $currentEmail) {
@@ -292,6 +291,8 @@ class contactClientify {
       }
       if($controlDelete == 0) $response = contactClientify::curlClientfyCallDelete("/contacts/{$this->id}/emails/{$currentEmail->id}/");
     }
+    $response = contactClientify::curlClientfyCall("/contacts/{$this->id}/emails/");
+    $this->emails = $response->results;
   }
 
   /* WEBSITES */
