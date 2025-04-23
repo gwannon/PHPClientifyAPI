@@ -58,7 +58,7 @@ class contactClientify {
         foreach ($response->custom_fields as $custom_field) {
           $this->custom_fields[] = [
             "field" => $custom_field->field,
-            "value" => $custom_field->value
+            "value" => ($custom_field->value != '--' ? $custom_field->value : "")
           ];
         }
       } else {
@@ -223,7 +223,7 @@ class contactClientify {
     foreach($this->custom_fields as $key => $custom_field) {
       $payload['custom_fields'][$key] = [
         'field' => $custom_field['field'],
-        'value' => $custom_field['value']
+        'value' => ($custom_field['value'] != '' ? $custom_field['value'] : "--")
       ];
     }
     $response = contactClientify::curlClientfyCallPut("/contacts/{$this->id}/", json_encode($payload));
